@@ -31,128 +31,429 @@ Task:
 
 '''
 
-from collections import Counter
-
-
 class PokerHand(object):
     RESULT = ["Loss", "Tie", "Win"]
 
     topHand = {"rflush": 1, "sflush": 2, "4kind": 3, "fullhouse": 4, "flush": 5, "straight": 6, "3kind": 7, "2pair": 8, "pair": 9, "highcard": 10}
 
-    #rankings = {"A": 1, "K": 2, "Q": 3, "J": 4, "T": 5, "9": 6, "8": 7, "7": 8, "6": 9, "5": 10, "4": 11, "3": 12, "2": 13}
+    rankings = {"A": 1, "K": 2, "Q": 3, "J": 4, "T": 5, "9": 6, "8": 7, "7": 8, "6": 9, "5": 10, "4": 11, "3": 12, "2": 13}
 
-    rankings = {"A": 5, "K": 3, "Q": 2, "J": 4, "T": 1, "9": 6, "8": 7, "7": 8, "6": 9, "5": 10, "4": 11, "3": 12, "2": 13}
 
     def __init__(self, hand):
-        #Constructor sets the current hand, rank, and its highcards
+
+        # Constructor sets the current hand, rank, and highcards of a particular instance of PokerHand
         self.hand = hand
         self.myRank = self.rank(hand)
         self.highCard = self.highC(hand)
 
     def compare_with(self, other):
-        try:
-            if self.myRank < other.myRank:
-                return self.RESULT[2]
-            elif self.myRank > other.myRank:
-                return self.RESULT[0]
 
-            # Tie Cases
+        if self.myRank < other.myRank:
+            return self.RESULT[2]
+        elif self.myRank > other.myRank:
+            return self.RESULT[0]
+        else:
 
-            else:
-                #Case: 4 of a kind
-                for i in range(5):
-                    self.rankings.get
-                    if self.rankings.get(self.highCard[i]) > self.rankings.get(other.highCard[i]):
-                        return self.RESULT[2]
+            # Tie Cases #
+
+            # Royal flush
+            if self.myRank and other.myRank is 1:
+                return self.RESULT[1]
+
+            # Straight flush
+            elif self.myRank and other.myRank is 2:
+
+                # Starting value of straight determines winner
+                if self.rankings.get(self.highCard[0]) < self.rankings.get(other.highCard[0]):
+                    return self.RESULT[2]
+                elif self.rankings.get(self.highCard[0]) > self.rankings.get(other.highCard[0]):
+                    return self.RESULT[0]
+                else:
+                    return self.RESULT[1]
+
+            # 4 of a kind
+            elif self.myRank and other.myRank is 3:
+
+                nums = self.highCard
+                for elem in nums:
+                    if nums.count(elem) == 4:
+                        four_card = elem
+                    else:
+                        one_card = elem
+
+                # Compare 4kind value than the remaining one card value
+                other_nums = other.highCard
+                for elem in other_nums:
+                    if other_nums.count(elem) == 4:
+                        if self.rankings.get(four_card) < self.rankings.get(elem):
+                            return self.RESULT[2]
+                        elif self.rankings.get(four_card) > self.rankings.get(elem):
+                            return self.RESULT[0]
+                    else:
+                        other_one = elem
+
+                if self.rankings.get(one_card) < self.rankings.get(other_one):
+                    return self.RESULT[2]
+                elif self.rankings.get(one_card) > self.rankings.get(other_one):
+                    return self.RESULT[0]
+                else:
+                    return self.RESULT[1]
+
+
+            # Full House
+            elif self.myRank and other.myRank is 4:
+
+                nums = self.highCard
+                for elem in nums:
+                    if nums.count(elem) == 3:
+                        three_card = elem
+                    else:
+                        two_card = elem
+
+                # Check 3kind value than 2kind value
+                other_nums = other.highCard
+                for elem in other_nums:
+                    if other_nums.count(elem) == 3:
+                        if self.rankings.get(three_card) < self.rankings.get(elem):
+                            return self.RESULT[2]
+                        elif self.rankings.get(three_card) > self.rankings.get(elem):
+                            return self.RESULT[0]
+                    else:
+                        other_two = elem
+
+                if self.rankings.get(two_card) < self.rankings.get(other_two):
+                    return self.RESULT[2]
+                elif self.rankings.get(two_card) > self.rankings.get(other_two):
+                    return self.RESULT[0]
 
                 return self.RESULT[1]
 
-        except (RuntimeError, TypeError, NameError):
-            pass
+            # Flush
+            elif self.myRank and other.myRank is 5:
 
-    def rank(self, str):
+                # Compare highest cards
+                nums = self.highCard
+                other_nums = other.highCard
+                for i in range(4, -1, -1):
+                    if self.rankings.get(nums[i]) < self.rankings.get(other_nums[i]):
+                        return self.RESULT[2]
+                    elif self.rankings.get(nums[i]) > self.rankings.get(other_nums[i]):
+                        return self.RESULT[0]
 
-        lst = str.split(" ")
+                return self.RESULT[1]
+
+            # Straight
+            elif self.myRank and other.myRank is 6:
+
+                # Starting value of straight determines winner
+                if self.rankings.get(self.highCard[0]) < self.rankings.get(other.highCard[0]):
+                    return self.RESULT[2]
+                elif self.rankings.get(self.highCard[0]) > self.rankings.get(other.highCard[0]):
+                    return self.RESULT[0]
+                else:
+                    return self.RESULT[1]
+
+            # 3 of a Kind
+            elif self.myRank and other.myRank is 7:
+
+                remaining = []
+                nums = self.highCard
+                for elem in nums:
+                    if nums.count(elem) == 3:
+                        three_card = elem
+                    else:
+                        remaining.append(elem)
+
+                # Compare 3kind value than remaining 2 values
+                other_nums = other.highCard
+                other_rem = []
+                for elem in other_nums:
+                    if other_nums.count(elem) == 3:
+                        if self.rankings.get(three_card) < self.rankings.get(elem):
+                            return self.RESULT[2]
+                        elif self.rankings.get(three_card) > self.rankings.get(elem):
+                            return self.RESULT[0]
+                    else:
+                        other_rem.append(elem)
+
+                for i in range(1, -1, -1):
+                    if self.rankings.get(remaining[i]) < self.rankings.get(other_rem[i]):
+                        return self.RESULT[2]
+                    elif self.rankings.get(remaining[i]) > self.rankings.get(other_rem[i]):
+                        return self.RESULT[0]
+                    else:
+                        return self.RESULT[1]
+
+            # Two pair
+            elif self.myRank and other.myRank is 8:
+
+                # Push to a set the values of 2 pairs and compare the two hands
+                pairs = set()
+                other_pair = set()
+
+                nums = self.highCard
+                for elem in nums:
+                    if nums.count(elem) == 2:
+                        pairs.add(elem)
+                    else:
+                        rem = elem
+
+                other_nums = other.highCard
+                for elem in other_nums:
+                    if other_nums.count(elem) == 2:
+                        other_pair.add(elem)
+                    else:
+                        other_rem = elem
+
+                for i in range(1, -1, -1):
+                    p = pairs.pop()
+                    op = other_pair.pop()
+                    if self.rankings.get(p) < self.rankings.get(op):
+                        return self.RESULT[2]
+                    elif self.rankings.get(p) > self.rankings.get(op):
+                        return self.RESULT[0]
+
+                # Compare the remaining one card value if both pair values are a tie
+                if self.rankings.get(rem) < self.rankings.get(other_rem):
+                    return self.RESULT[2]
+                elif self.rankings.get(rem) > self.rankings.get(other_rem):
+                    return self.RESULT[0]
+                else:
+                    return self.RESULT[1]
+
+            # One Pair
+            elif self.myRank and other.myRank is 9:
+
+                rem = []
+                nums = self.highCard
+                for elem in nums:
+                    if nums.count(elem) == 2:
+                        two_card = elem
+                    else:
+                        rem.append(elem)
+
+                # Check 2kind value than other value
+                other_nums = other.highCard
+                other_rem = []
+                for elem in other_nums:
+                    if other_nums.count(elem) == 2:
+                        if self.rankings.get(two_card) < self.rankings.get(elem):
+                            return self.RESULT[2]
+                        elif self.rankings.get(two_card) > self.rankings.get(elem):
+                            return self.RESULT[0]
+                    else:
+                        other_rem.append(elem)
+
+                for i in range(2, -1, -1):
+                    if self.rankings.get(rem[i]) < self.rankings.get(other_rem[i]):
+                        return self.RESULT[2]
+                    elif self.rankings.get(rem[i]) > self.rankings.get(other_rem[i]):
+                        return self.RESULT[0]
+
+                return self.RESULT[1]
+
+            # High Card
+            else:
+
+                # Compare highest cards
+                nums = self.highCard
+                other_nums = other.highCard
+                for i in range(4, -1, -1):
+                    if self.rankings.get(nums[i]) < self.rankings.get(other_nums[i]):
+                        return self.RESULT[2]
+                    elif self.rankings.get(nums[i]) > self.rankings.get(other_nums[i]):
+                        return self.RESULT[0]
+
+                return self.RESULT[1]
+
+    def rank(self, st):
+
+        lst = st.split(" ")
         lst.sort()
 
-        #Flush check
+        # Get only value of cards
+        nums = []
+        for c in lst:
+            nums.append(c[0])
+        nums.sort()
+
+        # Custom sorting to get Ace, King and Tens in the right place
+        while 'T' in nums:
+            ind = nums.index('T')
+            nums[ind] = 'B'
+            nums.sort()
+
+        while 'A' in nums:
+            ind = nums.index('A')
+            nums[ind] = 'Z'
+            nums.sort()
+
+        while 'K' in nums:
+            ind = nums.index('K')
+            nums[ind] = 'Y'
+            nums.sort()
+
+        while 'B' in nums:
+            ind = nums.index('B')
+            nums[ind] = 'T'
+
+        while 'Y' in nums:
+            ind = nums.index('Y')
+            nums[ind] = 'K'
+
+        while 'Z' in nums:
+            ind = nums.index('Z')
+            nums[ind] = 'A'
+
+        # Flush check
         for i in range(5):
             if lst[0][1] != lst[i][1]:
                 f = 0
                 break
-            else: f = 1
+            else:
+                f = 1
 
         if f is 1:
+
             # Straight/Royal Flush check
+
+            ##########################################
+            # Special Case: A 2 3 4 5
+            if 'A' in nums:
+                for j in range(4):
+                    if self.rankings.get(nums[0]) - j != self.rankings.get(2 + j):
+                        special = 0
+                        break
+                    else:
+                        special = 1
+                if special is 1:
+                    return self.topHand.get("sflush")
+            ##########################################
+
             for i in range(5):
 
-                if self.rankings.get(lst[0][0]) - i != self.rankings.get(lst[i][0]):
+                if self.rankings.get(nums[0]) - i != self.rankings.get(nums[i]):
                     sf = 0
                     break
                 else:
                     sf = 1
 
             if sf is 1:
-                if self.rankings.get(lst[0][0]) == 5:
+
+                # Straight starting with T, meaning royal flush
+                if self.rankings.get(nums[0]) == 5:
                     return self.topHand.get("rflush")
+
+                # Straight flush starting at some other value
                 else:
                     return self.topHand.get("sflush")
 
-            else: return self.topHand.get("flush")
+            else:
+                return self.topHand.get("flush")
 
         # Straight check
+
+        ##########################################
+        # Special Case: A 2 3 4 5
+        if 'A' in nums:
+            for j in range(4):
+                if self.rankings.get(nums[0]) - j != self.rankings.get(2 + j):
+                    special = 0
+                    break
+                else:
+                    special = 1
+            if special is 1:
+                return self.topHand.get("straight")
+        ##########################################
+
         for i in range(5):
-            if self.rankings.get(lst[0][0]) - i != self.rankings.get(lst[i][0]):
+            if self.rankings.get(nums[0]) - i != self.rankings.get(nums[i]):
                 s = 0
                 break
             else:
                 s = 1
-        if s is 1: return self.topHand.get("straight")
+        if s is 1:
+            return self.topHand.get("straight")
 
         # Kind check
-        nums = []
-        for c in lst:
-            nums.append(c[0])
 
-        rep = Counter(nums).items()
-        count, k3, k2 = 0, 0, 0
-        for k in rep.items():
-            if rep.get(k) == 4:
+        k3, k2 = 0, 0
+        count = set()
+        for elem in nums:
+            if nums.count(elem) == 4:
                 return self.topHand.get("4kind")
-            if rep.get(k) == 3:
+            if nums.count(elem) == 3:
                 k3 = 1
-            if rep.get(k) == 2:
+            if nums.count(elem) == 2:
                 k2 = 1
-                count += 1
+                count.add(elem)
 
         if k3 and k2:
             return self.topHand.get("fullhouse")
         elif k3:
             return self.topHand.get("3kind")
-        elif k2 and count == 2:
+        elif k2 and len(count) == 2:
             return self.topHand.get("2pair")
         elif k2:
             return self.topHand.get("pair")
 
+        # If all checks fail, return high card
         return self.topHand.get("highcard")
 
+    def highC(self, st):
 
-    def highC(self, str):
-        str = str.split(" ")
+        # Grab card values and return custom sorting
+
+        st = st.split(" ")
         nums = []
-        for c in str:
+        for c in st:
             nums.append(c[0])
 
-        return nums.sort()
+        nums.sort()
+
+        while 'T' in nums:
+            ind = nums.index('T')
+            nums[ind] = 'B'
+            nums.sort()
+
+        while 'A' in nums:
+            ind = nums.index('A')
+            nums[ind] = 'Z'
+            nums.sort()
+
+        while 'K' in nums:
+            ind = nums.index('K')
+            nums[ind] = 'Y'
+            nums.sort()
+
+        while 'B' in nums:
+            ind = nums.index('B')
+            nums[ind] = 'T'
+
+        while 'Y' in nums:
+            ind = nums.index('Y')
+            nums[ind] = 'K'
+
+        while 'Z' in nums:
+            ind = nums.index('Z')
+            nums[ind] = 'A'
+
+        return nums
 
 
 def runTest(msg, expected, hand, other):
     player, opponent = PokerHand(hand), PokerHand(other)
+
     print(player.compare_with(opponent), expected, "{}: '{}' against '{}'".format(msg, hand, other))
+
     #test.assert_equals(player.compare_with(opponent), expected, "{}: '{}' against '{}'".format(msg, hand, other))
 
 
 def main():
+    #runTest("Highest pair wins", "Loss", "KC 4H KS 2H 8D", "8C 4S KH JS 4D")
+    #runTest("Highest straight flush wins", "Loss", "JC 7H JS JD JH", "JH 9H TH KH QH")
+    runTest("I DONT KNOOOOW", "Win", "3D 2H 3H 2C 2D", "2H 2C 3S 3H 3D")
+
     runTest("Highest straight flush wins", "Loss", "2H 3H 4H 5H 6H", "KS AS TS QS JS")
     runTest("Straight flush wins of 4 of a kind", "Win", "2H 3H 4H 5H 6H", "AS AD AC AH JD")
     runTest("Highest 4 of a kind wins", "Win", "AS AH 2H AD AC", "JS JD JC JH 3D")
