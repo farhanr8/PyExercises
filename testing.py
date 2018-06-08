@@ -1,15 +1,3 @@
-def ham(n):
-    i, j, k = 0, 0, 0
-    h = 2 ** i * 3 ** j * 5 ** k
-
-    def op():
-        return 2 ** i * 3 ** j * 5 ** k
-
-    for num in range(0, n):
-        i++
-        if h < op():
-
-
 def test(str):
     str = str.split(" ")
     nums = []

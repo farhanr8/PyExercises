@@ -13,6 +13,8 @@ Specifically:
 
 '''
 
+# Times out in codewars :(
+
 # Function divides a by greatest divisible power of b
 def maxDivide( a, b ):
     while a % b == 0:
@@ -32,7 +34,7 @@ def hamming(n):
 
     # Che1ck all integers if its hamming until count becomes n
     while n > count:
-        i +=
+        i += 1
         if numCheck(i):
             count += 1
     return i
