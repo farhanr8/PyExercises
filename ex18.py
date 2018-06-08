@@ -37,6 +37,10 @@ For Go: nil slice is expected when there are no gap between m and n. Example: ga
 
 '''
 
+''' 
+
+Not efficient for codewars
+
 def isprime(n):
     if (n == 1):
         return False
@@ -47,18 +51,34 @@ def isprime(n):
             if (n % x == 0):
                 return False
         return True
+'''
+import math
+
+
+def isprime(n):
+    if n % 2 == 0 and n > 2:
+        return False
+    for i in range(3, int(math.sqrt(n)) + 1, 2):
+        if n % i == 0:
+            return False
+    return True
+
+
+def midcheck(m, n):
+    for i in range(m + 1, n):
+        if isprime(i):
+            return False
+
+    return True
+
 
 def gap(g, m, n):
-
-    prime = []
-
-    for i in range(m,n+1):
+    for i in range(m, n + 1):
         if isprime(i):
-            prime.append(i)
+            if isprime(i + g) and midcheck(i, i + g):
+                return [i, i + g]
 
-    for num in prime:
-        if num + g in prime:
-            return [num, num+g]
+
 
 def main():
     print(gap(2,100,110))

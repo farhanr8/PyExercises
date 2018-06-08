@@ -30,9 +30,9 @@ def hamming(n):
     i = 1
     count = 1
 
-    # Check for all integers until count becomes n
+    # Che1ck all integers if its hamming until count becomes n
     while n > count:
-        i += 1
+        i +=
         if numCheck(i):
             count += 1
     return i

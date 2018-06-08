@@ -1,7 +1,8 @@
 '''
 Snail Sort
 
-Given an n x n array, return the array elements arranged from outermost elements to the middle element, traveling clockwise.
+Given an n x n array, return the array elements arranged from outermost elements to the middle element,
+traveling clockwise.
 
 array = [[1,2,3],
          [4,5,6],
@@ -20,13 +21,15 @@ def snail(array):
 
     ln = len(array)
 
-    if len is 1: return array
+    if ln < 2:
+        return array[ln-1]
 
-    run = ln + 2
+    i = ln - 2
+    run = 3 + (2 * i)
 
     row = 0
-    rowUp = 0
-    rowDown = ln - 1
+    row_top = 0
+    row_bot = ln - 1
 
     col = 0
     colLeft = 0
@@ -37,15 +40,15 @@ def snail(array):
     for i in range(0, run):
         if ff > 0:
             if rev is 0:
-                row = rowUp
-                rowUp += 1
+                row = row_top
+                row_top += 1
 
                 for j in range(0, ln - 1):
                     if array[row][j] not in result:
                         result.append(array[row][j])
             else:
-                row = rowDown
-                rowDown -= 1
+                row = row_bot
+                row_bot -= 1
 
                 for j in range(ln - 1, -1, -1):
                     if array[row][j] not in result:
@@ -79,6 +82,11 @@ def snail(array):
 
 
 def main():
-    print(snail([1,2,3]))
+    array = [[1, 2, 3, 4, 5],
+             [6, 7, 8, 9, 10],
+             [11, 12, 13, 14, 15],
+             [16, 17, 18, 19, 20],
+             [21, 22, 23, 24, 25]]
+    print(snail(array))
 
 if __name__ == '__main__': main()
