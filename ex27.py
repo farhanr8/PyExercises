@@ -38,7 +38,6 @@ class PokerHand(object):
 
     rankings = {"A": 1, "K": 2, "Q": 3, "J": 4, "T": 5, "9": 6, "8": 7, "7": 8, "6": 9, "5": 10, "4": 11, "3": 12, "2": 13}
 
-
     def __init__(self, hand):
 
         # Constructor sets the current hand, rank, and highcards of a particular instance of PokerHand
@@ -321,7 +320,7 @@ class PokerHand(object):
             # Special Case: A 2 3 4 5
             if 'A' in nums:
                 for j in range(4):
-                    if self.rankings.get(nums[0]) - j != self.rankings.get(2 + j):
+                    if self.rankings.get(nums[0]) - j != self.rankings.get(str(2 + j)):
                         special = 0
                         break
                     else:
@@ -357,7 +356,7 @@ class PokerHand(object):
         # Special Case: A 2 3 4 5
         if 'A' in nums:
             for j in range(4):
-                if self.rankings.get(nums[0]) - j != self.rankings.get(2 + j):
+                if self.rankings.get(nums[j]) != self.rankings.get(str(2 + j)):
                     special = 0
                     break
                 else:
@@ -452,7 +451,7 @@ def runTest(msg, expected, hand, other):
 def main():
     #runTest("Highest pair wins", "Loss", "KC 4H KS 2H 8D", "8C 4S KH JS 4D")
     #runTest("Highest straight flush wins", "Loss", "JC 7H JS JD JH", "JH 9H TH KH QH")
-    runTest("I DONT KNOOOOW", "Win", "3D 2H 3H 2C 2D", "2H 2C 3S 3H 3D")
+    runTest("I DONT KNOOOOW", "Loss", "AD 2H 3H 4C 5D", "2H 2C 3S 3H 3D")
 
     runTest("Highest straight flush wins", "Loss", "2H 3H 4H 5H 6H", "KS AS TS QS JS")
     runTest("Straight flush wins of 4 of a kind", "Win", "2H 3H 4H 5H 6H", "AS AD AC AH JD")
