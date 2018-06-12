@@ -1,14 +1,61 @@
 import enum
 
 
+class OrderedEnum(enum.Enum):
+    def __ge__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value >= other.value
+        return NotImplemented
+    def __gt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value > other.value
+        return NotImplemented
+    def __le__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value <= other.value
+        return NotImplemented
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
+
+
+class HandRank(OrderedEnum):
+    ROYAL_FLUSH = 1
+    STRAIGHT_FLUSH = 2
+    FOUR_OF_KIND = 3
+    FULL_HOUSE = 4
+    FLUSH = 5
+    STRAIGHT = 6
+    THREE_OF_KIND = 7
+    TWO_PAIR = 8
+    PAIR = 9
+    HIGH_CARD = 10
+
+
+class CardRank(OrderedEnum):
+    ACE = 1
+    KING = 2
+    QUEEN = 3
+    JACK = 4
+    TEN = 5
+    NINE = 6
+    EIGHT = 7
+    SEVEN = 8
+    SIX = 9
+    FIVE = 10
+    FOUR = 11
+    THREE = 12
+    TWO = 13
+
+
+class Result(enum.Enum):
+    WIN = "Win"
+    LOSS = "Loss"
+    TIE = "Tie"
+
+
 class PokerHand(object):
-    RESULT = ["Loss", "Tie", "Win"]
-
-    TOP_HAND = {"rflush": 1, "sflush": 2, "4kind": 3, "fullhouse": 4, "flush": 5, "straight": 6, "3kind": 7, "2pair": 8,
-               "pair": 9, "highcard": 10}
-
-    RANKINGS = {"A": 1, "K": 2, "Q": 3, "J": 4, "T": 5, "9": 6, "8": 7, "7": 8, "6": 9, "5": 10, "4": 11, "3": 12,
-                "2": 13}
 
     def __init__(self, hand):
 
@@ -31,15 +78,11 @@ class PokerHand(object):
 
     def rank(self, st):
 
-        special_straight_index = 2
-
         cards = self.sorted_cards
-
-        # Get only value of cards
         nums = self.sorted_values
 
         # Flush check
-        for i in range(5):
+        for i in range(1, 5):
             if cards[0].suite != cards[i].suite:
                 f = 0
                 break
@@ -54,18 +97,18 @@ class PokerHand(object):
             # Special Case: A 2 3 4 5
             if 'A' in nums:
                 for j in range(4):
-                    if self.RANKINGS.get(cards[j].value) != self.RANKINGS.get(str(special_straight_index + j)):
+                    if cards[j].rank != CardRank.TWO.value + j:
                         special = 0
                         break
                     else:
                         special = 1
                 if special is 1:
-                    return self.TOP_HAND.get("sflush")
+                    return HandRank.STRAIGHT_FLUSH
             ##########################################
 
             for i in range(5):
 
-                if self.RANKINGS.get(cards[0].value) - i != self.RANKINGS.get(cards[i].value):
+                if cards[0].rank - i != cards[i].rank:
                     sf = 0
                     break
                 else:
@@ -74,15 +117,16 @@ class PokerHand(object):
             if sf is 1:
 
                 # Straight starting with T, meaning royal flush
-                if self.RANKINGS.get(cards[0].value) == self.Card.CardRank.TEN.value:
-                    return self.TOP_HAND.get("rflush")
+
+                if cards[0].rank == CardRank.TEN.value:
+                    return HandRank.ROYAL_FLUSH
 
                 # Straight flush starting at some other value
                 else:
-                    return self.TOP_HAND.get("sflush")
+                    return HandRank.STRAIGHT_FLUSH
 
             else:
-                return self.TOP_HAND.get("flush")
+                return HandRank.FLUSH
 
         # Straight check
 
@@ -90,23 +134,23 @@ class PokerHand(object):
         # Special Case: A 2 3 4 5
         if 'A' in nums:
             for j in range(4):
-                if self.RANKINGS.get(cards[j].value) != self.RANKINGS.get(str(special_straight_index + j)):
+                if cards[j].rank != CardRank.TWO.value + j:
                     special = 0
                     break
                 else:
                     special = 1
             if special is 1:
-                return self.TOP_HAND.get("straight")
+                return HandRank.STRAIGHT
         ##########################################
 
         for i in range(5):
-            if self.RANKINGS.get(cards[0].value) - i != self.RANKINGS.get(cards[i].value):
+            if cards[0].rank - i != cards[i].rank:
                 s = 0
                 break
             else:
                 s = 1
         if s is 1:
-            return self.TOP_HAND.get("straight")
+            return HandRank.STRAIGHT
 
         # Kind check
 
@@ -114,7 +158,7 @@ class PokerHand(object):
         count = set()
         for elem in nums:
             if nums.count(elem) == 4:
-                return self.TOP_HAND.get("4kind")
+                return HandRank.FOUR_OF_KIND
             if nums.count(elem) == 3:
                 k3 = 1
             if nums.count(elem) == 2:
@@ -122,248 +166,212 @@ class PokerHand(object):
                 count.add(elem)
 
         if k3 and k2:
-            return self.TOP_HAND.get("fullhouse")
+            return HandRank.FULL_HOUSE
         elif k3:
-            return self.TOP_HAND.get("3kind")
+            return HandRank.THREE_OF_KIND
         elif k2 and len(count) == 2:
-            return self.TOP_HAND.get("2pair")
+            return HandRank.TWO_PAIR
         elif k2:
-            return self.TOP_HAND.get("pair")
+            return HandRank.PAIR
 
         # If all checks fail, return high card
-        return self.TOP_HAND.get("highcard")
+
+        return HandRank.HIGH_CARD
 
     def compare_with(self, other):
 
         if self.myRank < other.myRank:
-            return self.RESULT[2]
+            return Result.WIN.value
+
         elif self.myRank > other.myRank:
-            return self.RESULT[0]
+            return Result.LOSS.value
+
         else:
 
             # Tie Cases #
 
-            # Royal flush
-            if self.myRank is self.HandRank.ROYAL_FLUSH.value:
-                return self.RESULT[1]
+            cards = self.sorted_cards
+            nums = self.sorted_values
+            other_cards = other.sorted_cards
+            other_nums = other.sorted_values
 
-            # Straight flush
-            elif self.myRank is self.HandRank.STRAIGHT_FLUSH.value:
+            # Royal flush
+            if self.myRank is HandRank.ROYAL_FLUSH:
+                return Result.TIE.value
+
+            # Straight flush or Straight
+            elif self.myRank is HandRank.STRAIGHT_FLUSH or self.myRank is HandRank.STRAIGHT:
 
                 # Starting value of straight determines winner
-                if self.sorted_cards[0].rank < other.sorted_cards[0].rank:
-                    return self.RESULT[2]
-                elif self.sorted_cards[0].rank > other.sorted_cards[0].rank:
-                    return self.RESULT[0]
+                if cards[0].rank < other_cards[0].rank:
+                    return Result.WIN.value
+                elif cards[0].rank > other_cards[0].rank:
+                    return Result.LOSS.value
                 else:
-                    return self.RESULT[1]
+                    return Result.TIE.value
 
             # 4 of a kind
-            elif self.myRank is self.HandRank.FOUR_OF_KIND.value:
+            elif self.myRank is HandRank.FOUR_OF_KIND:
 
-                nums = self.sorted_values
-                for elem in nums:
-                    if nums.count(elem) == 4:
-                        four_card = elem
+                for c in cards:
+                    if nums.count(c.value) == 4:
+                        four_card = c
                     else:
-                        one_card = elem
+                        one_card = c
 
                 # Compare 4kind value than the remaining one card value
-                other_nums = other.sorted_values
-                for elem in other_nums:
-                    if other_nums.count(elem) == 4:
-                        if self.RANKINGS.get(four_card) < self.RANKINGS.get(elem):
-                            return self.RESULT[2]
-                        elif self.RANKINGS.get(four_card) > self.RANKINGS.get(elem):
-                            return self.RESULT[0]
+
+                for card in other_cards:
+                    if other_nums.count(card.value) == 4:
+                        if four_card.rank < card.rank:
+                            return Result.WIN.value
+                        elif four_card.rank > card.rank:
+                            return Result.LOSS.value
                     else:
-                        other_one = elem
+                        other_one = card
 
-                if self.RANKINGS.get(one_card) < self.RANKINGS.get(other_one):
-                    return self.RESULT[2]
-                elif self.RANKINGS.get(one_card) > self.RANKINGS.get(other_one):
-                    return self.RESULT[0]
+                if one_card.rank < other_one.rank:
+                    return Result.WIN.value
+                elif one_card.rank > other_one.rank:
+                    return Result.LOSS.value
                 else:
-                    return self.RESULT[1]
-
+                    return Result.TIE.value
 
             # Full House
-            elif self.myRank is self.HandRank.FULL_HOUSE.value:
+            elif self.myRank is HandRank.FULL_HOUSE:
 
-                nums = self.sorted_values
-                for elem in nums:
-                    if nums.count(elem) == 3:
-                        three_card = elem
+                for c in cards:
+                    if nums.count(c.value) == 3:
+                        three_card = c
                     else:
-                        two_card = elem
+                        two_card = c
 
                 # Check 3kind value than 2kind value
-                other_nums = other.sorted_values
-                for elem in other_nums:
-                    if other_nums.count(elem) == 3:
-                        if self.RANKINGS.get(three_card) < self.RANKINGS.get(elem):
-                            return self.RESULT[2]
-                        elif self.RANKINGS.get(three_card) > self.RANKINGS.get(elem):
-                            return self.RESULT[0]
+                for card in other_cards:
+                    if other_nums.count(card.value) == 3:
+                        if three_card.rank < card.rank:
+                            return Result.WIN.value
+                        elif three_card.rank > card.rank:
+                            return Result.LOSS.value
                     else:
-                        other_two = elem
+                        other_two = card
 
-                if self.RANKINGS.get(two_card) < self.RANKINGS.get(other_two):
-                    return self.RESULT[2]
-                elif self.RANKINGS.get(two_card) > self.RANKINGS.get(other_two):
-                    return self.RESULT[0]
+                if two_card.rank < other_two.rank:
+                    return Result.WIN.value
+                elif two_card.rank > other_two.rank:
+                    return Result.LOSS.value
 
-                return self.RESULT[1]
+                return Result.TIE.value
 
-            # Flush
-            elif self.myRank is self.HandRank.FLUSH.value:
+            # Flush or High Card
+            elif self.myRank is HandRank.FLUSH or self.myRank is HandRank.HIGH_CARD:
 
                 # Compare highest cards
-                nums = self.sorted_cards
-                other_nums = other.sorted_cards
                 for i in range(4, -1, -1):
-                    if self.sorted_cards[i].rank < other.sorted_cards[i].rank:
-                        return self.RESULT[2]
-                    elif self.sorted_cards[i].rank < other.sorted_cards[i].rank:
-                        return self.RESULT[0]
+                    if cards[i].rank < other_cards[i].rank:
+                        return Result.WIN.value
+                    elif cards[i].rank > other_cards[i].rank:
+                        return Result.LOSS.value
 
-                return self.RESULT[1]
-
-            # Straight
-            elif self.myRank is self.HandRank.STRAIGHT.value:
-
-                # Starting value of straight determines winner
-                if self.sorted_cards[0].rank < other.sorted_cards[0].rank:
-                    return self.RESULT[2]
-                elif self.sorted_cards[0].rank > other.sorted_cards[0].rank:
-                    return self.RESULT[0]
-                else:
-                    return self.RESULT[1]
+                return Result.TIE.value
 
             # 3 of a Kind
-            elif self.myRank is self.HandRank.THREE_OF_KIND.value:
+            elif self.myRank is HandRank.THREE_OF_KIND:
 
                 remaining = []
-                nums = self.sorted_cards
-                for elem in nums:
-                    if nums.count(elem) == 3:
-                        three_card = elem
+                for c in cards:
+                    if nums.count(c.value) == 3:
+                        three_card = c
                     else:
-                        remaining.append(elem)
+                        remaining.append(c)
 
                 # Compare 3kind value than remaining 2 values
-                other_nums = other.sorted_cards
                 other_rem = []
-                for elem in other_nums:
-                    if other_nums.count(elem) == 3:
-                        if self.RANKINGS.get(three_card) < self.RANKINGS.get(elem):
-                            return self.RESULT[2]
-                        elif self.RANKINGS.get(three_card) > self.RANKINGS.get(elem):
-                            return self.RESULT[0]
+                for card in other_cards:
+                    if other_nums.count(card.value) == 3:
+                        if three_card.rank < card.rank:
+                            return Result.WIN.value
+                        elif three_card.rank > card.rank:
+                            return Result.LOSS.value
                     else:
-                        other_rem.append(elem)
+                        other_rem.append(card)
 
                 for i in range(1, -1, -1):
-                    if self.RANKINGS.get(remaining[i]) < self.RANKINGS.get(other_rem[i]):
-                        return self.RESULT[2]
-                    elif self.RANKINGS.get(remaining[i]) > self.RANKINGS.get(other_rem[i]):
-                        return self.RESULT[0]
+                    if remaining[i].rank < other_rem[i].rank:
+                        return Result.WIN.value
+                    elif remaining[i].rank > other_rem[i].rank:
+                        return Result.LOSS.value
                     else:
-                        return self.RESULT[1]
+                        return Result.TIE.value
 
             # Two pair
-            elif self.myRank is self.HandRank.TWO_PAIR.value:
+            elif self.myRank is HandRank.TWO_PAIR:
 
                 # Push to a set the values of 2 pairs and compare the two hands
-                pairs = set()
-                other_pair = set()
+                pairs = []
+                other_pairs = []
 
-                nums = self.sorted_values
-                for elem in nums:
-                    if nums.count(elem) == 2:
-                        pairs.add(elem)
+                for c in cards:
+                    ignore = []
+                    if nums.count(c.value) == 2:
+                        if c.value not in ignore:
+                            pairs.append(c)
+                            ignore.append(c.value)
                     else:
-                        rem = elem
+                        rem = c
 
-                other_nums = other.sorted_values
-                for elem in other_nums:
-                    if other_nums.count(elem) == 2:
-                        other_pair.add(elem)
+                for card in other_cards:
+                    ignore = []
+                    if other_nums.count(card.value) == 2:
+                        if card.value not in ignore:
+                            other_pairs.append(card)
+                            ignore.append(card.value)
                     else:
-                        other_rem = elem
+                        other_rem = card
 
                 for i in range(1, -1, -1):
-                    p = pairs.pop()
-                    op = other_pair.pop()
-                    if self.RANKINGS.get(p) < self.RANKINGS.get(op):
-                        return self.RESULT[2]
-                    elif self.RANKINGS.get(p) > self.RANKINGS.get(op):
-                        return self.RESULT[0]
+                    if pairs[i].rank < other_pairs[i].rank:
+                        return Result.WIN.value
+                    elif pairs[i].rank > other_pairs[i].rank:
+                        return Result.LOSS.value
 
                 # Compare the remaining one card value if both pair values are a tie
-                if self.RANKINGS.get(rem) < self.RANKINGS.get(other_rem):
-                    return self.RESULT[2]
-                elif self.RANKINGS.get(rem) > self.RANKINGS.get(other_rem):
-                    return self.RESULT[0]
+                if rem.rank < other_rem.rank:
+                    return Result.WIN.value
+                elif rem.rank > other_rem.rank:
+                    return Result.LOSS.value
                 else:
-                    return self.RESULT[1]
+                    return Result.TIE.value
 
             # One Pair
-            elif self.myRank is self.HandRank.PAIR.value:
+            elif self.myRank is HandRank.PAIR:
 
                 rem = []
-                nums = self.sorted_values
-                for elem in nums:
-                    if nums.count(elem) == 2:
-                        two_card = elem
+                for c in cards:
+                    if nums.count(c.value) == 2:
+                        two_card = c
                     else:
-                        rem.append(elem)
+                        rem.append(c)
 
                 # Check 2kind value than other value
-                other_nums = other.sorted_values
                 other_rem = []
-                for elem in other_nums:
-                    if other_nums.count(elem) == 2:
-                        if self.RANKINGS.get(two_card) < self.RANKINGS.get(elem):
-                            return self.RESULT[2]
-                        elif self.RANKINGS.get(two_card) > self.RANKINGS.get(elem):
-                            return self.RESULT[0]
+                for card in other_cards:
+                    if other_nums.count(card.value) == 2:
+                        if two_card.rank < card.rank:
+                            return Result.WIN.value
+                        elif two_card.rank > card.rank:
+                            return Result.LOSS.value
                     else:
-                        other_rem.append(elem)
+                        other_rem.append(card)
 
                 for i in range(2, -1, -1):
-                    if self.RANKINGS.get(rem[i]) < self.RANKINGS.get(other_rem[i]):
-                        return self.RESULT[2]
-                    elif self.RANKINGS.get(rem[i]) > self.RANKINGS.get(other_rem[i]):
-                        return self.RESULT[0]
+                    if rem[i].rank < other_rem[i].rank:
+                        return Result.WIN.value
+                    elif rem[i].rank > other_rem[i].rank:
+                        return Result.LOSS.value
 
-                return self.RESULT[1]
+                return Result.TIE.value
 
-            # High Card
-            else:
-
-                # Compare highest cards
-                nums = self.sorted_cards
-                other_nums = other.sorted_cards
-                for i in range(4, -1, -1):
-                    if nums[i].rank < other_nums[i].rank:
-                        return self.RESULT[2]
-                    elif nums[i].rank > other_nums[i].rank:
-                        return self.RESULT[0]
-
-                return self.RESULT[1]
-
-    class HandRank(enum.Enum):
-        ROYAL_FLUSH = 1
-        STRAIGHT_FLUSH = 2
-        FOUR_OF_KIND = 3
-        FULL_HOUSE = 4
-        FLUSH = 5
-        STRAIGHT = 6
-        THREE_OF_KIND = 7
-        TWO_PAIR = 8
-        PAIR = 9
-        HIGH_CARD = 10
 
     class Card:
 
@@ -374,51 +382,40 @@ class PokerHand(object):
 
         def __lt__(self, other):
             # Low rank, high value
-            return self.rank > other.rank
+            if self.__class__ is other.__class__:
+                return self.rank < other.rank
+            return NotImplemented
 
         def CardRanking(self, val):
             if val == 'A':
-                return self.CardRank.ACE.value
+                return CardRank.ACE.value
             elif val == 'K':
-                return self.CardRank.KING.value
+                return CardRank.KING.value
             elif val == 'Q':
-                return self.CardRank.QUEEN.value
+                return CardRank.QUEEN.value
             elif val == 'J':
-                return self.CardRank.JACK.value
+                return CardRank.JACK.value
             elif val == 'T':
-                return self.CardRank.TEN.value
+                return CardRank.TEN.value
             elif val == '9':
-                return self.CardRank.NINE.value
+                return CardRank.NINE.value
             elif val == '8':
-                return self.CardRank.EIGHT.value
+                return CardRank.EIGHT.value
             elif val == '7':
-                return self.CardRank.SEVEN.value
+                return CardRank.SEVEN.value
             elif val == '6':
-                return self.CardRank.SIX.value
+                return CardRank.SIX.value
             elif val == '5':
-                return self.CardRank.FIVE.value
+                return CardRank.FIVE.value
             elif val == '4':
-                return self.CardRank.FOUR.value
+                return CardRank.FOUR.value
             elif val == '3':
-                return self.CardRank.THREE.value
+                return CardRank.THREE.value
+                #return CardRank.THREE
             elif val == '2':
-                return self.CardRank.TWO.value
+                return CardRank.TWO.value
+                # return CardRank.TWO
 
-
-        class CardRank(enum.Enum):
-            ACE = 1
-            KING = 2
-            QUEEN = 3
-            JACK = 4
-            TEN = 5
-            NINE = 6
-            EIGHT = 7
-            SEVEN = 8
-            SIX = 9
-            FIVE = 10
-            FOUR = 11
-            THREE = 12
-            TWO = 13
 
 def runTest(msg, expected, hand, other):
     player, opponent = PokerHand(hand), PokerHand(other)
@@ -430,7 +427,7 @@ def runTest(msg, expected, hand, other):
 def main():
     # runTest("Highest pair wins", "Loss", "KC 4H KS 2H 8D", "8C 4S KH JS 4D")
     # runTest("Highest straight flush wins", "Loss", "JC 7H JS JD JH", "JH 9H TH KH QH")
-    runTest("I DONT KNOOOOW", "Loss", "3D 2H 3H 2C 2D", "2H 2C 3S 3H 3D")
+    runTest("I DONT KNOOOOW", "Loss", "JH AH TH KH QH", "JH AH TH KH QH")
 
     runTest("Highest straight flush wins", "Loss", "2H 3H 4H 5H 6H", "KS AS TS QS JS")
     runTest("Straight flush wins of 4 of a kind", "Win", "2H 3H 4H 5H 6H", "AS AD AC AH JD")
