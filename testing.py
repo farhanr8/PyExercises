@@ -1,11 +1,29 @@
-import random
+
+def evaluate(string):
+    list = string.split()
+    list = "".join(list)
+    list = list.split('/')
+    it = iter(list)
+    n = next(it)
+    i, j = 0, 0
+    res_list = []
+
+    while n:
+
+        res = list[i[-1]] / list[j[0]]
+        i += 1
+        j += 1
+        n = next(it)
+
+        res_list.append(res)
+
+
+    return list
 
 def main():
-
-
-    for i in range(5):
-        prob = random.random()
-        print(prob)
+    print(evaluate("2 / 2 + 3 * 4 - 6"))
 
 if __name__ == '__main__':
     main()
+
+    
