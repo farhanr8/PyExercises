@@ -1,11 +1,3 @@
-'''
-@author: S M Farhanur Rahman
-@NetID: sxr190032
-@Date: 09/11/2019
-Reference:
-- https://docs.python.org/2/library/socket.html#example
-- https://utdallas.app.box.com/s/gi1myjbbjqr83y2flllpusf1pdluivkd/file/519060898897
-'''
 
 from socket import *
 
